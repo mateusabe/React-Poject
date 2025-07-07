@@ -1,35 +1,50 @@
-import { useState } from 'react';
-function App(){
-  const [input,setInput] = useState('');
-  const [tarefas,setTarefas] = useState([
-    'Estuadar React',
-    'Estudar Node',
-  ]);
+import { useState, useEffect, use } from 'react';
 
-  function handleTasks(e){
+function App() {
+  const [input, setInput] = useState('');
+
+  const [tarefas, setTarefas] = useState(() => {
+    const tarefasStorage = localStorage.getItem('@tarefas');
+    return tarefasStorage ? JSON.parse(tarefasStorage) : ['Estudar React', 'Estudar Node'];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('@tarefas', JSON.stringify(tarefas));    
+  }, [tarefas]);
+
+  useEffect(() =>{
+    function getApi(){
+      fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json())
+      .then(data => console.log(data));
+    }
+
+    getApi();
+  },[])
+
+  function handleTasks(e) {
     e.preventDefault();
+    if (input.trim() === '') return;
 
-    setTarefas([...tarefas,input]);
+    setTarefas([...tarefas, input.trim()]);
     setInput('');
   }
 
   return (
     <div>
-      <form onSubmit={(e) => handleTasks(e)}>
-        <label>Nome da tarefa:</label><br/>
-        <input value={input} onChange={(e) => setInput(e.target.value)}/><br/>
-
-        <button type="submit" on>Cadastrar</button><br/>
+      <form onSubmit={handleTasks}>
+        <label>Nome da tarefa:</label><br />
+        <input value={input} onChange={(e) => setInput(e.target.value)} /><br />
+        <button type="submit">Cadastrar</button><br />
       </form>
 
       <ul>
-        {tarefas.map((tarefa) => (
-          <li key={tarefa}>{tarefa}</li>
+        {tarefas.map((tarefa, index) => (
+          <li key={index}>{tarefa}</li>
         ))}
       </ul>
-    </div>    
+    </div>
   );
 }
 
 export default App;
-
